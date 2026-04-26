@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+python-dotenv
+pymupdf
+faiss-cpu
+sentence-transformers
+neo4j
+requests
+numpy
+pandas
+scikit-learn
+rank_bm25
+python-multipart
+langchain-text-splitters
+matplotlib
+huggingface_hub
