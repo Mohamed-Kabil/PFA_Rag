@@ -7,6 +7,8 @@ from backend.data_extraction import PDFExtractor
 from backend.chunking import ChunkingManager
 from backend.vector_store import VectorStoreManager
 from backend.retrieval import HybridRetriever
+from backend.graph_extraction import GraphExtractor
+from backend.neo4j_manager import Neo4jManager
 
 load_dotenv()
 
@@ -54,13 +56,23 @@ def run_pipeline():
         vector_manager.process(DATA_DIR)
         print(f"✅ Indexation FAISS et visualisation PCA terminées.\n")
 
-    # --- ÉTAPE 4 : RETRIEVAL (TEST) ---
-    print("--- ÉTAPE 4 : RETRIEVAL (TEST) ---")
-    retriever = HybridRetriever(DATA_DIR)
-    test_query = "Quels sont les effets du changement climatique sur la biodiversité ?"
-    retriever.evaluate_methods(test_query)
-    
-    print("\n🎉 PIPELINE EXÉCUTÉ AVEC SUCCÈS JUSQU'À L'ÉTAPE 4 !")
+    # --- ÉTAPE 5 : EXTRACTION GRAPH (NER + REBEL) ---
+    graph_path = os.path.join(DATA_DIR, "knowledge_graph.json")
+    if os.path.exists(graph_path):
+        print("--- ÉTAPE 5 : EXTRACTION GRAPH ---")
+        print(f"✅ Fichier déjà présent : {graph_path}\n")
+    else:
+        print("--- ÉTAPE 5 : EXTRACTION GRAPH ---")
+        graph_extractor = GraphExtractor()
+        graph_extractor.run(chunks_path, graph_path, limit_chunks=None)
+        print(f"✅ Extraction Graph terminée.\n")
+
+    # --- ÉTAPE 6 & 7 : IMPORT NEO4J & LOUVAIN ---
+    print("--- ÉTAPES 6 & 7 : IMPORT NEO4J & LOUVAIN ---")
+    neo4j_manager = Neo4jManager()
+    neo4j_manager.run_pipeline(chunks_path, graph_path)
+
+    print("\n🎉 PIPELINE EXÉCUTÉ AVEC SUCCÈS JUSQU'À L'ÉTAPE 7 !")
 
 if __name__ == "__main__":
     try:
