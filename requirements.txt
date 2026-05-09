@@ -14,3 +14,11 @@ python-multipart
 langchain-text-splitters
 matplotlib
 huggingface_hub
+certifi
+networkx
+python-louvain
+torch
+transformers
+streamlit
+plotly
+pyvis

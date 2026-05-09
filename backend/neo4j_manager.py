@@ -1,203 +1,273 @@
 import certifi
-import os
 import json
-from neo4j import GraphDatabase
-from dotenv import load_dotenv
+import os
+import re
 
-# Correction robuste pour les erreurs SSL sur Windows
-os.environ['SSL_CERT_FILE'] = certifi.where()
+from dotenv import load_dotenv
+from neo4j import GraphDatabase
+
+os.environ["SSL_CERT_FILE"] = certifi.where()
 
 load_dotenv()
+
 
 class Neo4jManager:
     def __init__(self):
         self.uri = os.getenv("NEO4J_URI")
-        # Support pour NEO4J_USER ou NEO4J_USERNAME
         self.user = os.getenv("NEO4J_USER") or os.getenv("NEO4J_USERNAME")
         self.password = os.getenv("NEO4J_PASSWORD")
-        
+
         if not all([self.uri, self.user, self.password]):
-            raise ValueError(f"❌ Erreur : Credentials Neo4j manquants (URI: {self.uri}, User: {self.user})")
-            
-        print(f"🔌 Connexion à Neo4j ({self.uri}) en tant que '{self.user}'...")
-        try:
-            # On utilise TRUST_ALL_CERTIFICATES en plus de certifi pour une sécurité maximale/souplesse
-            self.driver = GraphDatabase.driver(
-                self.uri, 
-                auth=(self.user, self.password),
-                max_connection_lifetime=30 * 60,
-                connection_timeout=30
-            )
-            self.driver.verify_connectivity()
-            print("✅ Connexion Neo4j établie.")
-        except Exception as e:
-            print(f"⚠️ Échec de la connexion : {e}")
-            raise ConnectionError(f"❌ Impossible de se connecter à Neo4j. Vérifiez vos identifiants et votre instance.\nErreur: {e}")
+            raise ValueError("Credentials Neo4j manquants.")
+
+        print(f"Connexion Neo4j : {self.uri}")
+
+        self.driver = GraphDatabase.driver(
+            self.uri,
+            auth=(self.user, self.password),
+            max_connection_lifetime=30 * 60,
+            connection_timeout=30,
+        )
+        self.driver.verify_connectivity()
+
+        print("Connexion Neo4j etablie.")
 
     def close(self):
         self.driver.close()
 
     def query(self, cypher, parameters=None):
         with self.driver.session() as session:
-            return session.run(cypher, parameters)
+            result = session.run(cypher, parameters)
+            return list(result)
 
     def clear_database(self):
-        """Supprime tous les nœuds et relations pour repartir sur une base propre"""
-        print("🗑️ Nettoyage de la base de données Neo4j...")
-        # Suppression par blocs pour éviter de saturer la mémoire sur de gros graphes
+        print("Nettoyage Neo4j...")
         self.query("MATCH (n) DETACH DELETE n")
-        print("✅ Base de données vidée.")
+        print("Base videe.")
 
     def setup_constraints(self):
-        """Crée les index et contraintes d'unicité pour un graphe propre"""
-        print("⚙️ Configuration des contraintes Neo4j...")
-        # Contrainte d'unicité sur l'ID pour éviter les doublons lors des MERGE
+        print("Creation contraintes...")
+
         constraints = [
-            "CREATE CONSTRAINT entity_id_unique IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE",
-            "CREATE CONSTRAINT chunk_id_unique IF NOT EXISTS FOR (c:Chunk) REQUIRE c.id IS UNIQUE"
+            """
+            CREATE CONSTRAINT entity_id_unique
+            IF NOT EXISTS
+            FOR (e:Entity)
+            REQUIRE e.id IS UNIQUE
+            """,
+            """
+            CREATE CONSTRAINT chunk_id_unique
+            IF NOT EXISTS
+            FOR (c:Chunk)
+            REQUIRE c.id IS UNIQUE
+            """,
         ]
-        for c in constraints:
+
+        for constraint in constraints:
             try:
-                self.query(c)
-            except Exception as e:
-                print(f"⚠️ Note sur contrainte : {e}")
+                self.query(constraint)
+            except Exception as exc:
+                print(f"Contrainte : {exc}")
+
+    def normalize_relation_value(self, relation):
+        relation = str(relation or "related_to").strip().lower()
+        relation = relation.replace("-", "_").replace(" ", "_")
+        relation = re.sub(r"[^a-z0-9_]", "", relation)
+        return relation or "related_to"
 
     def upload_chunks(self, chunks_path):
-        """Importe les chunks de texte pour lier les entités à leur source"""
-        print(f"📥 Importation des chunks depuis {chunks_path}...")
+        print(f"Import chunks : {chunks_path}")
+
         if not os.path.exists(chunks_path):
-            print(f"❌ Fichier {chunks_path} introuvable.")
+            print(f"Fichier introuvable : {chunks_path}")
             return
 
-        with open(chunks_path, "r", encoding="utf-8") as f:
-            chunks = json.load(f)
-        
-        # MERGE permet d'éviter les doublons si on relance le script
+        with open(chunks_path, "r", encoding="utf-8") as handle:
+            chunks = json.load(handle)
+
         cypher = """
-        UNWIND $data as row
+        UNWIND $data AS row
         MERGE (c:Chunk {id: row.id})
-        SET c.text = row.text,
-            c.page = row.metadata.page_label
+        SET
+            c.text = row.text,
+            c.page = coalesce(row.metadata.page_label, ""),
+            c.section = coalesce(row.metadata.section, ""),
+            c.chapter = coalesce(row.metadata.chapter, "")
         """
+
         self.query(cypher, {"data": chunks})
-        print(f"✅ {len(chunks)} chunks importés.")
+        print(f"{len(chunks)} chunks importes.")
 
     def upload_graph_data(self, graph_path):
-        """Importe les entités et les relations sémantiques"""
-        print(f"📥 Importation du graphe sémantique depuis {graph_path}...")
+        print(f"Import graphe : {graph_path}")
+
         if not os.path.exists(graph_path):
-            print(f"❌ Fichier {graph_path} introuvable.")
+            print(f"Fichier introuvable : {graph_path}")
             return
 
-        with open(graph_path, "r", encoding="utf-8") as f:
-            graph = json.load(f)
+        with open(graph_path, "r", encoding="utf-8") as handle:
+            graph = json.load(handle)
 
-        # 1. Import des Nœuds (Entity) et lien avec les Chunks
-        print("   - Création des nœuds Entity et relations MENTIONED_IN...")
+        nodes = graph.get("nodes", [])
+        edges = graph.get("edges", [])
+
+        print("Creation entites...")
+
         node_cypher = """
-        UNWIND $nodes as row
-        // On utilise le nom comme identifiant unique (slugifié ou direct)
+        UNWIND $nodes AS row
         MERGE (e:Entity {id: toLower(row.name)})
-        SET e.name = row.name, 
-            e.type = row.type, 
-            e.description = row.description
+        SET
+            e.name = row.name,
+            e.type = coalesce(row.type, "concept"),
+            e.description = coalesce(row.description, "")
         WITH e, row
-        UNWIND row.chunks as chunk_id
-        MATCH (c:Chunk {id: chunk_id})
-        MERGE (e)-[:MENTIONED_IN]->(c)
+        FOREACH (
+            chunk_id IN coalesce(row.chunks, []) |
+            MERGE (c:Chunk {id: chunk_id})
+            MERGE (e)-[:MENTIONED_IN]->(c)
+        )
         """
-        self.query(node_cypher, {"nodes": graph["nodes"]})
 
-        # 2. Import des Relations (Edges)
-        print("   - Création des relations sémantiques entre entités...")
+        self.query(node_cypher, {"nodes": nodes})
+        print(f"{len(nodes)} entites creees.")
+
+        print("Creation relations...")
+        imported_edges = 0
+
         edge_cypher = """
-        UNWIND $edges as row
-        MATCH (source:Entity {id: toLower(row.source)})
-        MATCH (target:Entity {id: toLower(row.target)})
-        // Utilisation de la relation spécifiée dans le JSON
-        CALL apoc.merge.relationship(source, row.relation, {}, {}, target) YIELD rel
-        SET rel.chunk_id = row.chunk_id
+        MERGE (s:Entity {id: toLower($source_id)})
+        ON CREATE SET
+            s.name = $source_name,
+            s.type = "concept"
+        MERGE (t:Entity {id: toLower($target_id)})
+        ON CREATE SET
+            t.name = $target_name,
+            t.type = "concept"
+        MERGE (s)-[r:RELATED_TO {type: $relation}]->(t)
+        SET
+            r.chunk_id = $chunk_id,
+            r.chunk_ids = coalesce($chunk_ids, []),
+            r.type = $relation,
+            r.evidence_count = coalesce($evidence_count, 1),
+            r.weight = coalesce($weight, 1.0)
         """
-        try:
-            self.query(edge_cypher, {"edges": graph["edges"]})
-        except Exception as e:
-            print(f"⚠️ Erreur lors de l'import des relations (APOC requis) : {e}")
-            # Fallback
-            fallback_cypher = """
-            UNWIND $edges as row
-            MATCH (source:Entity {id: toLower(row.source)})
-            MATCH (target:Entity {id: toLower(row.target)})
-            MERGE (source)-[r:RELATED_TO]->(target)
-            SET r.original_relation = row.relation, r.chunk_id = row.chunk_id
-            """
-            self.query(fallback_cypher, {"edges": graph["edges"]})
-        
-        print(f"✅ {len(graph['nodes'])} entités et {len(graph['edges'])} relations traitées.")
+
+        with self.driver.session() as session:
+            for edge in edges:
+                try:
+                    relation = self.normalize_relation_value(edge.get("relation"))
+                    session.run(
+                        edge_cypher,
+                        {
+                            "source_id": edge["source"],
+                            "source_name": edge["source"],
+                            "target_id": edge["target"],
+                            "target_name": edge["target"],
+                            "relation": relation,
+                            "chunk_id": edge.get("chunk_id"),
+                            "chunk_ids": edge.get("chunk_ids", []),
+                            "evidence_count": edge.get("evidence_count", 1),
+                            "weight": edge.get("weight", 1.0),
+                        },
+                    ).consume()
+                    imported_edges += 1
+                except Exception as exc:
+                    print(
+                        f"Erreur relation : {edge.get('relation')} -> {exc}"
+                    )
+
+        print(f"{imported_edges} relations creees.")
 
     def run_louvain(self):
-        """Détection de communautés Louvain (GDS ou Fallback Local)"""
-        print("🧪 Lancement de l'algorithme Louvain...")
-        
+        print("Calcul Louvain local...")
+
         with self.driver.session() as session:
             try:
-                # Tentative native GDS (pour les versions pro/locales)
-                session.run("CALL gds.graph.drop('myGraph', false)").consume()
-                session.run("CALL gds.graph.project('myGraph', 'Entity', '*')").consume()
-                louvain_cypher = "CALL gds.louvain.write('myGraph', {writeProperty: 'communityId'}) YIELD communityCount, modularity"
-                result = session.run(louvain_cypher).single()
-                print(f"✅ Louvain (GDS) terminé : {result['communityCount']} communautés.")
-            except Exception:
-                print("⚠️ GDS non disponible. Passage au calcul local (NetworkX)...")
-                try:
-                    import networkx as nx
-                    import community as community_louvain # python-louvain
-                    
-                    # 1. Récupérer TOUTES les relations depuis Neo4j
-                    graph_data = session.run("MATCH (s:Entity)-[r]->(t:Entity) RETURN s.id as s, t.id as t").data()
-                    
-                    if not graph_data:
-                        print("❌ Graphe vide, impossible de calculer les communautés.")
-                        return
-                        
-                    G = nx.Graph()
-                    for rel in graph_data:
-                        G.add_edge(rel['s'], rel['t'])
-                    
-                    # 2. Calculer Louvain localement
-                    partition = community_louvain.best_partition(G)
-                    
-                    # 3. Réinjecter dans Neo4j
-                    update_cypher = """
-                    UNWIND $data as row
-                    MATCH (e:Entity {id: row.id})
-                    SET e.communityId = row.cid
-                    """
-                    data_to_push = [{"id": node, "cid": cid} for node, cid in partition.items()]
-                    session.run(update_cypher, {"data": data_to_push})
-                    print(f"✅ Louvain (Local) terminé : {len(set(partition.values()))} communautés injectées.")
-                    
-                except ImportError:
-                    print("❌ Bibliothèques networkx ou python-louvain manquantes.")
-                except Exception as e:
-                    print(f"❌ Échec du calcul local : {e}")
+                import community as community_louvain
+                import networkx as nx
 
-    def run_pipeline(self, chunks_path, graph_path):
-        """Pipeline complet d'ingestion et d'analyse"""
-        print("\n🚀 DÉMARRAGE DE L'IMPORTATION NEO4J\n")
+                graph_data = session.run(
+                    """
+                    MATCH (s:Entity)-[r:RELATED_TO]->(t:Entity)
+                    RETURN
+                        s.id AS s,
+                        t.id AS t,
+                        coalesce(r.weight, 1.0) AS weight
+                    """
+                ).data()
+
+                if not graph_data:
+                    print("Graphe vide.")
+                    return
+
+                graph = nx.Graph()
+                for relation in graph_data:
+                    graph.add_edge(
+                        relation["s"],
+                        relation["t"],
+                        weight=float(relation["weight"]),
+                    )
+
+                print(
+                    f"Graphe NetworkX : {len(graph.nodes())} noeuds / "
+                    f"{len(graph.edges())} relations"
+                )
+
+                partition = community_louvain.best_partition(
+                    graph,
+                    weight="weight",
+                    random_state=42,
+                )
+                modularity = community_louvain.modularity(
+                    partition,
+                    graph,
+                    weight="weight",
+                )
+
+                print(f"Communautes : {len(set(partition.values()))}")
+                print(f"Modularity : {modularity:.4f}")
+
+                update_cypher = """
+                UNWIND $data AS row
+                MATCH (e:Entity {id: row.id})
+                SET e.communityId = row.cid
+                """
+
+                data_to_push = [
+                    {"id": node, "cid": int(cid)}
+                    for node, cid in partition.items()
+                ]
+
+                session.run(update_cypher, {"data": data_to_push}).consume()
+                print("Communautes sauvegardees.")
+            except Exception as exc:
+                print(f"Erreur Louvain local : {exc}")
+
+    def run_pipeline(self, chunks_path, graph_path, clear_first=None):
+        print("\n=== PIPELINE NEO4J ===\n")
+
         try:
-            self.clear_database() # Nettoyage pour repartir sur une base propre
+            if clear_first is None:
+                clear_first = (
+                    os.getenv("NEO4J_CLEAR_ON_IMPORT", "false").lower()
+                    == "true"
+                )
+
+            if clear_first:
+                self.clear_database()
+
             self.setup_constraints()
             self.upload_chunks(chunks_path)
             self.upload_graph_data(graph_path)
             self.run_louvain()
-            print("\n🎉 PIPELINE NEO4J TERMINÉ AVEC SUCCÈS !")
+            print("\nPIPELINE TERMINE")
         finally:
             self.close()
 
+
 if __name__ == "__main__":
     manager = Neo4jManager()
-    # Chemins par défaut
     manager.run_pipeline(
-        "agentic_graph_rag/data/corpus_chunks.json",
-        "agentic_graph_rag/data/knowledge_graph.json"
+        "data/corpus_chunks.json",
+        "data/knowledge_graph.json",
     )

@@ -1,0 +1,18 @@
+{
+    "chunk_count": 861,
+    "embedding_dimension": 768,
+    "pca_explained_variance_ratio": [
+        0.09748199582099915,
+        0.07211128622293472
+    ],
+    "pca_total_2d_variance": 0.16959327459335327,
+    "cluster_count": 8,
+    "plot_label_type": "chapter",
+    "plot_label_counts": {
+        "Introduction générale": 234,
+        "Chapitre1: Les oiseaux chanteurs des milieux ouverts d’altitude, indicateurs des changements globaux": 159,
+        "Chapitre2: Saisonnalité et paramètres démographiques chez un corvidé de l’étage alpin: Le": 159,
+        "Chapitre3: Le pâturage par les grands mammifères herbivores influence fortement le régime alimentaire des passereaux insectivores.": 86,
+        "Chapitre 4: L’échantillonnage adaptatif à partir d’un modèle de niche, ou échantillonnage préférentiel, pour améliorer l’efficacité des prospections: tests sur la base de simulations et d’expérimentations.": 223
+    }
+}

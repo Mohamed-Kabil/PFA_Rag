@@ -125,7 +125,7 @@ if __name__ == "__main__":
         
         # Sauvegarde du résultat nettoyé
         import json
-        output_file = os.path.join(os.getenv("DATA_DIR", "agentic_graph_rag/data"), "corpus_cleaned_en.json")
+        output_file = os.path.join(os.getenv("DATA_DIR", "data"), "corpus_cleaned_en.json")
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         
         with open(output_file, "w", encoding="utf-8") as f:

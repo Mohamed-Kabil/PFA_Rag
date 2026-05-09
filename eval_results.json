@@ -1,0 +1,84 @@
+[
+    {
+        "category": "A) DIRECT FACT QUESTIONS",
+        "question": "Quels sont les services écosystémiques mentionnés dans le document ?",
+        "action": "Vector",
+        "chunks_summary": [
+            "iétés humaines profitent et dépendent de processus biologiques, qui assurent la satisfaction durable...",
+            "s populations (espèces polaires et alpines, espèces très spécialisées), ou l’impossibilité physique ...",
+            "e de macro écologie. Ces deux « échelles » de travail, mais surtout les deux raisonnements proposés ..."
+        ],
+        "answer": "Selon le contexte fourni, les services écosystémiques mentionnés dans le document comprennent :\n\n1. Filtration des eaux de surface\n2. Renouvellement de la fertilité des sols\n3. Pollinisation des cultures",
+        "retrieval_time": 0.54
+    },
+    {
+        "category": "A) DIRECT FACT QUESTIONS",
+        "question": "Quel pourcentage de mammifères et d'oiseaux a disparu au cours des deux derniers siècles selon Ceballos et al. (2015) ?",
+        "action": "Vector",
+        "chunks_summary": [
+            "siècles avec une accélération des taux de disparition sur cette période (Figure 2, Ceballos et al. 2...",
+            "avec la sélection sexuelle, car elle favorise l’existence de formes de vies adaptées aux conditions ...",
+            "einemer et al. (2015) ont identifié 30 études multi-spécifiques permettant d’estimer les remplacemen..."
+        ],
+        "answer": "Selon Ceballos et al. (2015), 2% des mammifères et 1% des oiseaux ont disparu au cours des deux derniers siècles.",
+        "retrieval_time": 0.13
+    },
+    {
+        "category": "B) IMPOSSIBLE QUESTIONS",
+        "question": "Quel est le régime alimentaire précis de l'ours polaire décrit dans le texte ?",
+        "action": "Vector",
+        "chunks_summary": [
+            "eractions trophiques. Il est maintenant nécessaire de comprendre à quel degré la flexibilité du régi...",
+            "tribution du trait de plasticité trophique du régime alimentaire chez les oiseaux de montagne. Avant...",
+            "a variété, et a mené à considérer ces espèces comme des opportunistes, l’interaction entre ce régime..."
+        ],
+        "answer": "Je ne trouve pas cette information dans les documents fournis.",
+        "retrieval_time": 0.11
+    },
+    {
+        "category": "B) IMPOSSIBLE QUESTIONS",
+        "question": "Quelles sont les recommandations spécifiques pour la gestion des forêts tropicales en Amazonie ?",
+        "action": "Vector",
+        "chunks_summary": [
+            "s également de prendre en compte le changement de structure de la végétation et le changement de pro...",
+            "Prédire les effets des changements globaux sur la biodiversité? Certaines de nos activités influent ...",
+            "interactions biotiques, traits des espèces et réponse des espèces aux variations thermiques de leur ..."
+        ],
+        "answer": "Pour gérer efficacement les forêts tropicales en Amazonie face aux changements climatiques et agricoles, il est crucial de mettre en place une approche intégrée qui combine plusieurs stratégies :\n\n1. **Amélioration des pratiques agricoles** :",
+        "retrieval_time": 0.11
+    },
+    {
+        "category": "C) PARTIAL CONTEXT QUESTIONS",
+        "question": "Comment l'importation de ruches aux États-Unis a-t-elle évolué au cours des dix dernières années ?",
+        "action": "Vector",
+        "chunks_summary": [
+            "l’échelle d’un espace géographique donné, la disparition ou la baisse d’effectifs de certains taxons..."
+        ],
+        "answer": "L'évolution de l'importation de ruches aux États-Unis depuis les dix dernières années est difficile à déterminer directement dans ce contexte. Cependant, il semble que ces importations ont augmenté significativement en raison de la nécessité",
+        "retrieval_time": 0.11
+    },
+    {
+        "category": "C) PARTIAL CONTEXT QUESTIONS",
+        "question": "Quelles sont les conclusions de l'étude de Morgera (2018) citée dans le texte ?",
+        "action": "Vector",
+        "chunks_summary": [
+            "lisation d’un système biologique, ou pour identifier un manque de connaissance clé dans cet objectif...",
+            "t proposé par Kumar et al. (1997) et estimation du rayonnement diffus (Oliphant et al. 2003, la méth...",
+            "changements de climat de la bibliographie (Scridel et al. 2018), soit également due à un décalage en..."
+        ],
+        "answer": "Je suis désolé, mais je ne trouve pas cette information dans les documents fournis.",
+        "retrieval_time": 0.09
+    },
+    {
+        "category": "D) MULTI-CHUNK QUESTIONS",
+        "question": "Expliquez le lien entre l'anthropocène, les changements globaux et la disparition des espèces en vous basant sur le texte.",
+        "action": "Vector",
+        "chunks_summary": [
+            "Anthropocène et diversité biologique Comprendre et anticiper les conséquences des changements globau...",
+            "avec la sélection sexuelle, car elle favorise l’existence de formes de vies adaptées aux conditions ...",
+            "Introduction L'évaluation des effets des changements globaux sur la biodiversité est cruciale pour é..."
+        ],
+        "answer": "L'anthropocène, caractérisé par l'impact humain significatif sur l'environnement terrestre, a conduit à des changements globaux tels que la modification rapide des pressions de sélection environnementales à l'échelle mondiale. Ces chang",
+        "retrieval_time": 0.11
+    }
+]

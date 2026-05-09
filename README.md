@@ -1,28 +1,42 @@
-# PFA_Rag : Agentic Vectorial Graph RAG
+# PFA_Rag: Agentic Vectorial Graph RAG
 
-Projet de Fin d'Année (4ème année IA) sur le système "Agentic Vectorial Graph RAG".
+Projet de Fin d'Annee sur un systeme Agentic Vectorial Graph RAG.
 
-## 🚀 État du projet
-Actuellement, le projet a complété les **4 premières étapes** du pipeline :
-1. **Extraction PDF** : Nettoyage et extraction intelligente.
-2. **Chunking** : Découpage sémantique et récursif des données.
-3. **Indexation Vectorielle** : Création d'un index FAISS et visualisation PCA 2D.
-4. **Retrieval Hybride** : Moteur de recherche combinant Vectorial Search et BM25 avec Reranking.
+## Structure
+- `apps/` : interface Streamlit.
+- `backend/` : API, retrieval, graph, generation, chunking et ingestion.
+- `scripts/` : commandes CLI pour le pipeline et le chat.
+- `data/` : artefacts generes ou traites par le pipeline RAG.
+- `documents/` : documents sources et references du projet.
+- `vendor/` : bibliotheques web vendorees.
+- `outputs/` : fichiers generes a l'execution, ignores par Git.
 
-## 🛠️ Installation
-1. Cloner le dépôt.
-2. Créer un environnement virtuel : `python -m venv venv`.
-3. Installer les dépendances : `pip install -r requirements.txt`.
-4. Configurer le fichier `.env` (voir `.env.example`).
+## Installation
+1. Creer un environnement virtuel : `python -m venv venv`.
+2. Installer les dependances : `pip install -r requirements.txt`.
+3. Configurer le fichier `.env` a partir de `.env.example`.
 
-## 📈 Exécution
-Pour lancer le pipeline complet jusqu'à l'étape 4 :
+## Execution
+Lancer le pipeline complet :
 ```powershell
-python main.py
+python scripts/run_pipeline.py
 ```
 
-## 📋 Prochaines Étapes
-- **Étape 5** : Construction du Graphe de Connaissances (NER + REBEL).
-- **Étape 6** : Injection dans Neo4j AuraDB.
-- **Étape 8** : Implémentation de l'Agent Q-Learning pour le routage intelligent.
-- **Étape 9/10** : Backend FastAPI et Frontend React.
+Lancer l'API FastAPI :
+```powershell
+python backend/main_api.py
+```
+
+Lancer l'interface Streamlit :
+```powershell
+streamlit run apps/streamlit_app.py
+```
+
+Lancer le chat CLI :
+```powershell
+python scripts/chat_cli.py
+```
+
+## Nettoyage
+Les dossiers `venv/`, `__pycache__/` et les fichiers `*.pyc` ne doivent pas etre versionnes.
+Les visualisations temporaires sont ecrites dans `outputs/`.

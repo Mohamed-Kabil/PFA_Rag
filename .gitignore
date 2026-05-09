@@ -3,8 +3,9 @@ venv/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
-agentic_graph_rag/data/raw/
-agentic_graph_rag/data/cleaned/
+outputs/
+data/raw/
+data/cleaned/
 # On peut choisir de garder les index FAISS ou non, mais souvent ils sont gros
 # agentic_graph_rag/data/faiss_index.bin
 # agentic_graph_rag/data/corpus_chunks.json
