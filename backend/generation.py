@@ -3,8 +3,12 @@ import torch
 from transformers import pipeline
 
 
+from backend import config
+
+
 class LocalGenerator:
-    def __init__(self, model_name="Qwen/Qwen2.5-1.5B-Instruct"):
+    def __init__(self, model_name=None):
+        model_name = model_name or config.LLM_MODEL_NAME
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         print(f"Chargement du modèle {model_name} sur {self.device}...")
@@ -176,7 +180,7 @@ QUESTION :
 
         response = self.pipe(
             prompt,
-            max_new_tokens=150,
+            max_new_tokens=300,
             do_sample=False,
             temperature=0.0,
             top_p=1.0,
@@ -188,6 +192,11 @@ QUESTION :
         )
 
         answer = response[0]["generated_text"].strip()
+
+        # Cut at the last sentence-ending punctuation so the answer never stops mid-sentence
+        last_stop = max(answer.rfind('.'), answer.rfind('!'), answer.rfind('?'))
+        if last_stop > len(answer) // 3:
+            answer = answer[:last_stop + 1].strip()
 
         elapsed = round(time.time() - start_time, 2)
 

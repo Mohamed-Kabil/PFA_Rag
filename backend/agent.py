@@ -2,19 +2,17 @@ import json
 import os
 import random
 import unicodedata
+from pathlib import Path
 
-try:
-    from backend.graph_retrieval import GraphRetriever
-    from backend.retrieval import HybridRetriever
-except ImportError:
-    from graph_retrieval import GraphRetriever
-    from retrieval import HybridRetriever
+from backend.graph_retrieval import GraphRetriever
+from backend.retrieval import HybridRetriever
+from backend import config
 
 
 class RoutingAgent:
-    def __init__(self, data_dir, q_table_path="q_table.json"):
-        self.data_dir = data_dir
-        self.q_table_path = os.path.join(data_dir, q_table_path)
+    def __init__(self, data_dir=None, q_table_path=None):
+        self.data_dir = Path(data_dir) if data_dir else config.DATA_DIR
+        self.q_table_path = Path(q_table_path) if q_table_path else config.Q_TABLE_JSON
 
         # 0 = Vector, 1 = Graph, 2 = Hybrid
         self.actions = [0, 1, 2]
@@ -29,7 +27,7 @@ class RoutingAgent:
         self.alpha = 0.1
         self.gamma = 0.9
 
-        self.vector_retriever = HybridRetriever(data_dir)
+        self.vector_retriever = HybridRetriever(str(self.data_dir))
         self.graph_retriever = GraphRetriever()
         self.q_table = self.load_q_table()
         self.last_decisions = []
@@ -38,7 +36,7 @@ class RoutingAgent:
     # Q-TABLE
     # =====================================================
     def load_q_table(self):
-        if not os.path.exists(self.q_table_path):
+        if not self.q_table_path.exists():
             return {}
 
         try:
@@ -527,7 +525,10 @@ class RoutingAgent:
 
 
 if __name__ == "__main__":
-    agent = RoutingAgent("data")
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    DATA_DIR = BASE_DIR / "data"
+
+    agent = RoutingAgent(DATA_DIR)
 
     queries = [
         "Quelle est l'influence du paturage sur la biodiversite alpine ?",

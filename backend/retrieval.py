@@ -11,20 +11,20 @@ from sentence_transformers import (
 from rank_bm25 import BM25Okapi
 from dotenv import load_dotenv
 
-load_dotenv()
-
+from pathlib import Path
+from backend import config
 
 class HybridRetriever:
-    def __init__(self, data_dir):
+    def __init__(self, data_dir=None):
         print("Chargement du système de retrieval...")
+        
+        # Conversion en Path si c'est une chaîne
+        self.data_dir = Path(data_dir) if data_dir else config.DATA_DIR
 
         # =====================================================
         # LOAD CHUNKS
         # =====================================================
-        chunks_path = os.path.join(
-            data_dir,
-            "corpus_chunks.json"
-        )
+        chunks_path = config.CHUNKS_JSON if not data_dir else self.data_dir / "corpus_chunks.json"
 
         with open(
             chunks_path,
@@ -38,12 +38,9 @@ class HybridRetriever:
         # =====================================================
         # LOAD FAISS
         # =====================================================
-        index_path = os.path.join(
-            data_dir,
-            "faiss_index.bin"
-        )
+        index_path = config.FAISS_INDEX if not data_dir else self.data_dir / "faiss_index.bin"
 
-        self.index = faiss.read_index(index_path)
+        self.index = faiss.read_index(str(index_path))
 
         print("Index FAISS chargé")
 
@@ -53,7 +50,7 @@ class HybridRetriever:
         print("Chargement du modèle embeddings...")
 
         self.vector_model = SentenceTransformer(
-            "paraphrase-multilingual-mpnet-base-v2"
+            config.EMBEDDING_MODEL_NAME
         )
 
         # =====================================================
@@ -62,7 +59,7 @@ class HybridRetriever:
         print("Chargement du reranker...")
 
         self.reranker = CrossEncoder(
-            "cross-encoder/ms-marco-MiniLM-L-6-v2"
+            config.RERANK_MODEL_NAME
         )
 
         # =====================================================
@@ -389,7 +386,8 @@ class HybridRetriever:
 
 
 if __name__ == "__main__":
-    DATA_DIR = "data"
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    DATA_DIR = BASE_DIR / "data"
 
     retriever = HybridRetriever(DATA_DIR)
 

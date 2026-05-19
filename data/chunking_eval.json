@@ -1,0 +1,47 @@
+{
+  "best_method": "Fixed-Size",
+  "scores": {
+    "Fixed-Size": {
+      "chunks_count": 31,
+      "cohesion": 0.7626,
+      "balance": 0.9864,
+      "score": 2.0184
+    },
+    "Sentence": {
+      "chunks_count": 86,
+      "cohesion": 0.3869,
+      "balance": 0.5965,
+      "score": 1.072
+    },
+    "Paragraph": {
+      "chunks_count": 10,
+      "cohesion": 0.6953,
+      "balance": 0.669,
+      "score": 1.7252
+    },
+    "Sliding Window": {
+      "chunks_count": 39,
+      "cohesion": 0.7486,
+      "balance": 0.9289,
+      "score": 1.9616
+    },
+    "Recursive": {
+      "chunks_count": 44,
+      "cohesion": 0.6509,
+      "balance": 0.8019,
+      "score": 1.7028
+    },
+    "Semantic": {
+      "chunks_count": 80,
+      "cohesion": 0.3827,
+      "balance": 0.5582,
+      "score": 1.0446
+    },
+    "Hierarchical": {
+      "chunks_count": 38,
+      "cohesion": 0.6243,
+      "balance": 0.7454,
+      "score": 1.6214
+    }
+  }
+}

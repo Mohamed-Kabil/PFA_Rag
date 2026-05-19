@@ -8,14 +8,14 @@ from neo4j import GraphDatabase
 # SSL fix for Windows
 os.environ["SSL_CERT_FILE"] = certifi.where()
 
-load_dotenv()
+from backend import config
 
 
 class GraphRetriever:
     def __init__(self):
-        self.uri = os.getenv("NEO4J_URI")
-        self.user = os.getenv("NEO4J_USER") or os.getenv("NEO4J_USERNAME")
-        self.password = os.getenv("NEO4J_PASSWORD")
+        self.uri = config.NEO4J_URI
+        self.user = config.NEO4J_USER
+        self.password = config.NEO4J_PASSWORD
 
         if not all([self.uri, self.user, self.password]):
             raise ValueError("Credentials Neo4j manquants pour le Retriever.")

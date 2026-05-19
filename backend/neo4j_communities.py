@@ -9,21 +9,11 @@ from community import community_louvain
 # SSL Fix Windows
 os.environ['SSL_CERT_FILE'] = certifi.where()
 
-# =====================================================
-# LOAD ENV VARIABLES
-# =====================================================
-load_dotenv()
-
-# =====================================================
-# NEO4J CONFIG
-# =====================================================
-URI = os.getenv("NEO4J_URI")
-USER = os.getenv("NEO4J_USER") or os.getenv("NEO4J_USERNAME")
-PASSWORD = os.getenv("NEO4J_PASSWORD")
+from backend import config
 
 driver = GraphDatabase.driver(
-    URI,
-    auth=(USER, PASSWORD)
+    config.NEO4J_URI,
+    auth=(config.NEO4J_USER, config.NEO4J_PASSWORD)
 )
 
 # =====================================================

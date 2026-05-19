@@ -1,11 +1,25 @@
+# Environment
 .env
+
+# Python
 venv/
 __pycache__/
 *.pyc
+*.pyo
 .ipynb_checkpoints/
-outputs/
+
+# Large binary / generated data files
+data/faiss_index.bin
 data/raw/
 data/cleaned/
-# On peut choisir de garder les index FAISS ou non, mais souvent ils sont gros
-# agentic_graph_rag/data/faiss_index.bin
-# agentic_graph_rag/data/corpus_chunks.json
+outputs/
+
+# Logs
+*.log
+
+# Frontend build & dependencies
+frontend/node_modules/
+frontend/dist/
+
+# Editor
+.vscode/

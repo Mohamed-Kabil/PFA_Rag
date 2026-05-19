@@ -10,25 +10,20 @@ from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
-try:
-    from dotenv import load_dotenv
-
-    load_dotenv()
-except ImportError:
-    pass
-
+from pathlib import Path
+from backend import config
 
 class VectorStoreManager:
     def __init__(self, chunks_file):
-        self.chunks_file = chunks_file
-        if not os.path.exists(chunks_file):
+        self.chunks_file = Path(chunks_file)
+        if not self.chunks_file.exists():
             raise FileNotFoundError(f"Fichier chunks introuvable : {chunks_file}")
 
-        with open(chunks_file, "r", encoding="utf-8") as f:
+        with open(self.chunks_file, "r", encoding="utf-8") as f:
             self.chunks = json.load(f)
 
         print("Chargement du modele d'embeddings...")
-        self.model = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2")
+        self.model = SentenceTransformer(config.EMBEDDING_MODEL_NAME)
         self.index = None
         self.pca_model = None
 
@@ -96,11 +91,12 @@ class VectorStoreManager:
         cluster_labels = kmeans.fit_predict(embeddings)
         label_type, plot_labels = self._labels_for_plot(cluster_labels)
 
-        os.makedirs(output_dir, exist_ok=True)
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-        faiss.write_index(self.index, os.path.join(output_dir, "faiss_index.bin"))
+        faiss.write_index(self.index, str(output_dir / "faiss_index.bin"))
 
-        with open(os.path.join(output_dir, "pca_model.pkl"), "wb") as f:
+        with open(output_dir / "pca_model.pkl", "wb") as f:
             pickle.dump(self.pca_model, f)
 
         explained = self.pca_model.explained_variance_ratio_
@@ -108,7 +104,7 @@ class VectorStoreManager:
             pca_points,
             plot_labels,
             explained,
-            os.path.join(output_dir, "pca_visualization.png"),
+            str(output_dir / "pca_visualization.png"),
         )
 
         for i, chunk in enumerate(self.chunks):
@@ -117,7 +113,7 @@ class VectorStoreManager:
             chunk["cluster_id"] = int(cluster_labels[i])
             chunk["plot_label"] = plot_labels[i]
 
-        with open(os.path.join(output_dir, "indexed_chunks.json"), "w", encoding="utf-8") as f:
+        with open(output_dir / "indexed_chunks.json", "w", encoding="utf-8") as f:
             json.dump(self.chunks, f, ensure_ascii=False, indent=4)
 
         stats = {
@@ -129,18 +125,19 @@ class VectorStoreManager:
             "plot_label_type": label_type,
             "plot_label_counts": dict(Counter(plot_labels)),
         }
-        with open(os.path.join(output_dir, "pca_stats.json"), "w", encoding="utf-8") as f:
+        with open(output_dir / "pca_stats.json", "w", encoding="utf-8") as f:
             json.dump(stats, f, ensure_ascii=False, indent=4)
 
         print(f"Indexation et visualisation terminees dans {output_dir}")
 
 
 if __name__ == "__main__":
-    data_dir = "data"
-    chunks_path = os.path.join(data_dir, "corpus_chunks.json")
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    DATA_DIR = BASE_DIR / "data"
+    chunks_path = DATA_DIR / "corpus_chunks.json"
 
     try:
         manager = VectorStoreManager(chunks_path)
-        manager.process(data_dir)
+        manager.process(DATA_DIR)
     except Exception as e:
         print(f"Erreur lors de l'indexation : {e}")

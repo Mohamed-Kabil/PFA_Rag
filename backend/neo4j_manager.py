@@ -2,20 +2,20 @@ import certifi
 import json
 import os
 import re
+from pathlib import Path
 
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
+from backend import config
 
 os.environ["SSL_CERT_FILE"] = certifi.where()
-
-load_dotenv()
 
 
 class Neo4jManager:
     def __init__(self):
-        self.uri = os.getenv("NEO4J_URI")
-        self.user = os.getenv("NEO4J_USER") or os.getenv("NEO4J_USERNAME")
-        self.password = os.getenv("NEO4J_PASSWORD")
+        self.uri = config.NEO4J_URI
+        self.user = config.NEO4J_USER
+        self.password = config.NEO4J_PASSWORD
 
         if not all([self.uri, self.user, self.password]):
             raise ValueError("Credentials Neo4j manquants.")
@@ -78,7 +78,8 @@ class Neo4jManager:
     def upload_chunks(self, chunks_path):
         print(f"Import chunks : {chunks_path}")
 
-        if not os.path.exists(chunks_path):
+        chunks_path = Path(chunks_path)
+        if not chunks_path.exists():
             print(f"Fichier introuvable : {chunks_path}")
             return
 
@@ -101,7 +102,8 @@ class Neo4jManager:
     def upload_graph_data(self, graph_path):
         print(f"Import graphe : {graph_path}")
 
-        if not os.path.exists(graph_path):
+        graph_path = Path(graph_path)
+        if not graph_path.exists():
             print(f"Fichier introuvable : {graph_path}")
             return
 
@@ -266,8 +268,11 @@ class Neo4jManager:
 
 
 if __name__ == "__main__":
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    DATA_DIR = BASE_DIR / "data"
+
     manager = Neo4jManager()
     manager.run_pipeline(
-        "data/corpus_chunks.json",
-        "data/knowledge_graph.json",
+        str(DATA_DIR / "corpus_chunks.json"),
+        str(DATA_DIR / "knowledge_graph.json"),
     )

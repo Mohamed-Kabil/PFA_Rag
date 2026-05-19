@@ -1,13 +1,9 @@
 import json
 import os
 import re
-import sys
 from pathlib import Path
 
 import docx
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.chunking import ChunkingManager
 
@@ -198,25 +194,26 @@ def read_docx(file_path):
 
     return data
 
-def run_pipeline_for_docx(include_graph=False, include_neo4j=False):
-    data_dir = "data"
-    os.makedirs(data_dir, exist_ok=True)
+from backend import config
 
-    docx_path = "documents/corpus_clean.docx"
+def run_pipeline_for_docx(include_graph=False, include_neo4j=False):
+    config.DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    docx_path = config.CORPUS_CLEAN_DOCX
 
     print(f"--- 1. LECTURE DU FICHIER {docx_path} ---")
-    data = read_docx(docx_path)
+    data = read_docx(str(docx_path))
 
-    cleaned_path = os.path.join(data_dir, "corpus_cleaned_fr.json")
+    cleaned_path = config.DATA_DIR / "corpus_cleaned_fr.json"
     with open(cleaned_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
     print(f"Fichier lu : {len(data)} blocs generes.\n")
 
     print("--- 2. CHUNKING ---")
-    chunker = ChunkingManager(cleaned_path)
+    chunker = ChunkingManager(str(cleaned_path))
     final_chunks = chunker.run_final()
 
-    chunks_path = os.path.join(data_dir, "corpus_chunks.json")
+    chunks_path = config.CHUNKS_JSON
     with open(chunks_path, "w", encoding="utf-8") as f:
         json.dump(final_chunks, f, ensure_ascii=False, indent=4)
     print(f"Chunking termine : {len(final_chunks)} chunks.\n")
@@ -224,17 +221,17 @@ def run_pipeline_for_docx(include_graph=False, include_neo4j=False):
     print("--- 3. INDEXATION VECTORIELLE ---")
     from backend.vector_store import VectorStoreManager
 
-    vector_manager = VectorStoreManager(chunks_path)
-    vector_manager.process(data_dir)
+    vector_manager = VectorStoreManager(str(chunks_path))
+    vector_manager.process(str(config.DATA_DIR))
     print("Indexation FAISS terminee.\n")
 
     if include_graph:
         from backend.graph_extraction import GraphExtractor
 
         print("--- 4. EXTRACTION GRAPH ---")
-        graph_path = os.path.join(data_dir, "knowledge_graph.json")
+        graph_path = config.KNOWLEDGE_GRAPH_JSON
         graph_extractor = GraphExtractor()
-        graph_extractor.run(chunks_path, graph_path, limit_chunks=None)
+        graph_extractor.run(str(chunks_path), str(graph_path), limit_chunks=None)
         print("Extraction Graph terminee.\n")
 
     if include_neo4j:
@@ -242,8 +239,8 @@ def run_pipeline_for_docx(include_graph=False, include_neo4j=False):
 
         print("--- 5. IMPORT NEO4J & LOUVAIN ---")
         neo4j_manager = Neo4jManager()
-        graph_path = os.path.join(data_dir, "knowledge_graph.json")
-        neo4j_manager.run_pipeline(chunks_path, graph_path)
+        graph_path = config.KNOWLEDGE_GRAPH_JSON
+        neo4j_manager.run_pipeline(str(chunks_path), str(graph_path))
 
     print("\nPipeline DOCX execute avec succes.")
 

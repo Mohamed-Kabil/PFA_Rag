@@ -3,6 +3,7 @@ import os
 import re
 import unicodedata
 from itertools import combinations
+from pathlib import Path
 
 import torch
 from dotenv import load_dotenv
@@ -12,7 +13,7 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 # Disable symlink warnings on Windows
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
-load_dotenv()
+from backend import config
 
 
 class GraphExtractor:
@@ -407,16 +408,16 @@ class GraphExtractor:
 
         self.ner_pipe = pipeline(
             "ner",
-            model="Jean-Baptiste/camembert-ner",
+            model=config.NER_MODEL_NAME,
             aggregation_strategy="simple",
             device=self.device_idx,
         )
 
         self.rebel_tokenizer = AutoTokenizer.from_pretrained(
-            "Babelscape/rebel-large"
+            config.REBEL_MODEL_NAME
         )
         self.rebel_model = AutoModelForSeq2SeqLM.from_pretrained(
-            "Babelscape/rebel-large"
+            config.REBEL_MODEL_NAME
         )
 
         if self.device == "cuda":
@@ -956,7 +957,8 @@ class GraphExtractor:
             "edges": final_edges,
         }
 
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as handle:
             json.dump(output_data, handle, ensure_ascii=False, indent=4)
 
@@ -966,9 +968,12 @@ class GraphExtractor:
 
 
 if __name__ == "__main__":
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    DATA_DIR = BASE_DIR / "data"
+
     extractor = GraphExtractor()
     extractor.run(
-        "data/corpus_chunks.json",
-        "data/knowledge_graph.json",
+        str(DATA_DIR / "corpus_chunks.json"),
+        str(DATA_DIR / "knowledge_graph.json"),
         limit_chunks=None,
     )

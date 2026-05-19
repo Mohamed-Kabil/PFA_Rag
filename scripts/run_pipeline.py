@@ -1,11 +1,7 @@
 import os
 import json
-import sys
 from pathlib import Path
 from dotenv import load_dotenv
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import des modules du backend
 from backend.process_docx import read_docx

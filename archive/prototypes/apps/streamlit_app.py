@@ -240,8 +240,38 @@ with tab_graph:
                     nodes = graph_resp['nodes']
                     edges = graph_resp['edges']
                     
-                    # Création du graphe Pyvis
-                    net = Network(height="600px", width="100%", bgcolor="#0e1117", font_color="white")
+                    # Création du graphe Pyvis avec options de stabilisation
+                    net = Network(height="600px", width="100%", bgcolor="#0e1117", font_color="white", notebook=False)
+                    
+                    # Configuration avancée pour le centrage et la fluidité
+                    net.set_options("""
+                    {
+                      "physics": {
+                        "forceAtlas2Based": {
+                          "gravitationalConstant": -50,
+                          "centralGravity": 0.01,
+                          "springLength": 100,
+                          "springConstant": 0.08
+                        },
+                        "maxVelocity": 50,
+                        "solver": "forceAtlas2Based",
+                        "timestep": 0.35,
+                        "stabilization": {
+                          "enabled": true,
+                          "iterations": 1000,
+                          "updateInterval": 25,
+                          "onlyDynamicEdges": false,
+                          "fit": true
+                        }
+                      },
+                      "interaction": {
+                        "hover": true,
+                        "navigationButtons": true,
+                        "multiselect": true
+                      }
+                    }
+                    """)
+
                     colors = ["#FF4B4B", "#4BFF4B", "#4B4BFF", "#FFFF4B", "#FF4BFF", "#4BFFFF", "#FFA500"]
                     
                     for n in nodes:
@@ -254,8 +284,21 @@ with tab_graph:
                     # Affichage
                     graph_path = OUTPUT_DIR / "graph.html"
                     net.save_graph(str(graph_path))
+                    
+                    # Injection de script pour forcer le "Fit" après le chargement
                     with open(graph_path, 'r', encoding='utf-8') as f:
-                        components.html(f.read(), height=600)
+                        html_content = f.read()
+                    
+                    # On injecte l'appel network.fit() juste avant la fin du script
+                    fit_script = """
+                        network.on("stabilizationIterationsDone", function () {
+                            network.fit();
+                        });
+                        setTimeout(function() { network.fit(); }, 500);
+                    </script>"""
+                    html_content = html_content.replace("</script>", fit_script)
+                    
+                    components.html(html_content, height=600, scrolling=False)
                 else:
                     st.error("Erreur de récupération des données du graphe.")
             except Exception as e:

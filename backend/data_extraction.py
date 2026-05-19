@@ -3,17 +3,18 @@ import os
 import re
 import requests
 import time
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+from backend import config
 
 class PDFExtractor:
     def __init__(self, pdf_path):
-        self.pdf_path = pdf_path
-        self.hf_token = os.getenv("HF_TOKEN")
+        self.pdf_path = Path(pdf_path)
+        self.hf_token = config.HF_TOKEN
         self.translation_api_url = "https://api-inference.huggingface.co/models/Helsinki-NLP/opus-mt-fr-en"
         
-        if not os.path.exists(pdf_path):
+        if not self.pdf_path.exists():
             raise FileNotFoundError(f"Fichier non trouvé : {pdf_path}")
 
     def clean_text(self, text):
@@ -117,16 +118,16 @@ class PDFExtractor:
         return final_data
 
 if __name__ == "__main__":
-    pdf_file = os.getenv("PDF_PATH", "rag_translated_fr.pdf")
-    extractor = PDFExtractor(pdf_file)
+    pdf_file = config.CORPUS_DIR / os.getenv("PDF_PATH", "project_form.pdf")
+    extractor = PDFExtractor(str(pdf_file))
     
     try:
         results = extractor.extract_and_clean()
         
         # Sauvegarde du résultat nettoyé
         import json
-        output_file = os.path.join(os.getenv("DATA_DIR", "data"), "corpus_cleaned_en.json")
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        output_file = config.DATA_DIR / "corpus_cleaned_en.json"
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(results, f, ensure_ascii=False, indent=4)
