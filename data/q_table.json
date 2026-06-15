@@ -10,7 +10,7 @@
         0.1
     ],
     "type=Semantic|complexity=low|semantic=0|systematic=0|relation=0": [
-        -0.21113403716710005,
+        -0.2900206334503901,
         0.0,
         0.0
     ],
@@ -20,7 +20,7 @@
         -0.1
     ],
     "type=Semantic|complexity=low|semantic=1|systematic=0|relation=0": [
-        0.30671299,
+        0.4946073744091701,
         0.0,
         0.0
     ],
@@ -35,7 +35,7 @@
         0.1
     ],
     "type=Semantic|complexity=medium|semantic=1|systematic=0|relation=0": [
-        0.018909999999999996,
+        0.11872089999999999,
         0.0,
         0.0
     ],
@@ -45,6 +45,16 @@
         0.1
     ],
     "type=Semantic|complexity=high|semantic=1|systematic=0|relation=0": [
+        0.199,
+        0.0,
+        0.0
+    ],
+    "type=Hybrid|complexity=medium|semantic=1|systematic=1|relation=1": [
+        0.0,
+        0.0,
+        0.199
+    ],
+    "type=Semantic|complexity=medium|semantic=0|systematic=0|relation=0": [
         0.1,
         0.0,
         0.0

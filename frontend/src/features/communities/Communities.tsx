@@ -473,7 +473,7 @@ export const Communities: React.FC = () => {
             <input
               type="text"
               placeholder="Filter communities by member name or ID…"
-              className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm placeholder-gray-400"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -523,13 +523,13 @@ export const Communities: React.FC = () => {
             <div className="flex-1">
               <label className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Start Entity</label>
               <input type="text" value={pathStart} onChange={(e) => setPathStart(e.target.value)} placeholder="e.g. modèle de niche"
-                className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-400" />
             </div>
             <div className="hidden sm:flex items-center pb-2"><ArrowRight className="text-gray-300" size={18} /></div>
             <div className="flex-1">
               <label className="text-[10px] font-bold uppercase text-gray-400 block mb-1">End Entity</label>
               <input type="text" value={pathEnd} onChange={(e) => setPathEnd(e.target.value)} placeholder="e.g. biodiversité"
-                className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-400" />
             </div>
             <button onClick={handleFindPath} disabled={pathLoading || !pathStart.trim() || !pathEnd.trim()}
               className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold disabled:opacity-50 flex items-center gap-2 transition-colors whitespace-nowrap">

@@ -251,7 +251,7 @@ export const ChatInterface: React.FC = () => {
                 }
               }}
               placeholder="Ask a question..."
-              className="w-full pl-4 pr-14 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+              className="w-full pl-4 pr-14 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm text-gray-900 dark:text-white placeholder-gray-400"
             />
             <button
               type="submit"
