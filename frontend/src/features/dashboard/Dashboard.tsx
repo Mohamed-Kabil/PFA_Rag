@@ -217,7 +217,7 @@ export const Dashboard: React.FC = () => {
           {/* Graph Preview */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold flex items-center gap-2">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Database className="text-blue-500" size={18} />
                 Knowledge Graph Preview
               </h2>
@@ -231,7 +231,7 @@ export const Dashboard: React.FC = () => {
           {/* Agent Intelligence Panel */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-base font-bold flex items-center gap-2">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Brain className="text-purple-500" size={18} />
                 Agent Intelligence
               </h2>
@@ -340,7 +340,7 @@ export const Dashboard: React.FC = () => {
 
           {/* Top Communities */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
-            <h2 className="text-base font-bold mb-4 flex items-center gap-2">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Layers className="text-purple-500" size={18} />
               Top Communities
             </h2>
@@ -389,7 +389,7 @@ export const Dashboard: React.FC = () => {
 
           {/* Recent Queries */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
-            <h2 className="text-base font-bold mb-4 flex items-center gap-2">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Clock className="text-orange-500" size={18} />
               Recent Queries
               {agentState?.last_decisions?.length ? (

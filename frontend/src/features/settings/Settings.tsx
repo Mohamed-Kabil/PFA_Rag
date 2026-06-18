@@ -38,7 +38,7 @@ export const Settings: React.FC = () => {
         <div className="md:col-span-2 space-y-8">
           {/* Retrieval Settings */}
           <section className="bg-white dark:bg-gray-900 p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-6">
-            <h3 className="text-lg font-bold flex items-center gap-2">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Database className="text-blue-500" size={20} />
               Retrieval Strategy
             </h3>
@@ -84,7 +84,7 @@ export const Settings: React.FC = () => {
 
           {/* Graph Settings */}
           <section className="bg-white dark:bg-gray-900 p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-6">
-            <h3 className="text-lg font-bold flex items-center gap-2">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Share2 className="text-purple-500" size={20} />
               Visualization Physics
             </h3>
@@ -126,7 +126,7 @@ export const Settings: React.FC = () => {
 
           {/* UI Preferences */}
           <section className="bg-white dark:bg-gray-900 p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-6">
-            <h3 className="text-lg font-bold flex items-center gap-2">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Monitor className="text-green-500" size={20} />
               Interface Preferences
             </h3>

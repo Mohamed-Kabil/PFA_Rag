@@ -3,6 +3,7 @@ import { useChatStore } from '../../stores/chat-store';
 import { searchService } from '../../services/api-service';
 import { ChatMessage } from './components/ChatMessage';
 import { RetrievalPanel } from './components/RetrievalPanel';
+import { CACHED_SUGGESTIONS } from './cached-suggestions';
 import {
   Send, Trash2, Loader2, Sparkles, Bot,
   History, Zap, ArrowRight, Clock,
@@ -107,6 +108,17 @@ export const ChatInterface: React.FC = () => {
     }
   };
 
+  // Instant answer for a pre-cached suggestion — no retrieval/LLM wait.
+  const handleSuggestion = (s: typeof CACHED_SUGGESTIONS[number]) => {
+    if (isLoading) return;
+    setInput('');
+    setRoutingPreview(null);
+    addMessage({ role: 'user', content: s.question });
+    addMessage({ role: 'assistant', content: s.answer, metadata: s.metadata });
+    setActiveMessageIndex(messages.length + 1);
+    setSideTab('trace');
+  };
+
   const currentAssistantMessage = activeMessageIndex !== null ? messages[activeMessageIndex] : null;
 
   // Query history: pairs of (user query, assistant response)
@@ -160,19 +172,19 @@ export const ChatInterface: React.FC = () => {
               <p className="text-gray-500 dark:text-gray-400 max-w-sm text-sm">
                 Ask anything about your knowledge base. I'll use a combination of vector search and graph analysis to provide cited, accurate answers.
               </p>
-              <div className="mt-8 flex flex-wrap gap-2 justify-center">
-                {[
-                  "Impact de la fragmentation ?",
-                  "Comment les espèces survivent ?",
-                  "List key climate policies",
-                  "C'est quoi la meilleure méthode de chunking/embedding dans notre projet?",
-                ].map((hint) => (
+              <div className="mt-8 flex flex-col gap-2 w-full max-w-md">
+                <p className="text-[10px] uppercase tracking-widest font-bold text-gray-400 flex items-center justify-center gap-1.5">
+                  <Zap size={11} /> Suggestions — instant answers
+                </p>
+                {CACHED_SUGGESTIONS.map((s) => (
                   <button
-                    key={hint}
-                    onClick={() => setInput(hint)}
-                    className="px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-xs font-medium text-gray-600 dark:text-gray-400 hover:border-blue-300 transition-all"
+                    key={s.question}
+                    onClick={() => handleSuggestion(s)}
+                    className="group flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all text-left"
                   >
-                    {hint}
+                    <Sparkles size={13} className="text-blue-500 shrink-0" />
+                    <span className="flex-1">{s.question}</span>
+                    <ArrowRight size={12} className="text-gray-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all shrink-0" />
                   </button>
                 ))}
               </div>
@@ -202,6 +214,24 @@ export const ChatInterface: React.FC = () => {
 
         {/* Input Area */}
         <div className="p-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 space-y-2">
+
+          {/* ── Persistent quick suggestions (instant answers) ── */}
+          {messages.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {CACHED_SUGGESTIONS.map((s) => (
+                <button
+                  key={s.question}
+                  onClick={() => handleSuggestion(s)}
+                  disabled={isLoading}
+                  title={s.question}
+                  className="group flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-[11px] font-medium text-gray-600 dark:text-gray-300 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 disabled:opacity-50 transition-all max-w-[260px]"
+                >
+                  <Sparkles size={11} className="text-blue-500 shrink-0" />
+                  <span className="truncate">{s.question}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* ── Routing Preview Indicator (#35) ── */}
           {(routingPreview || previewLoading) && (

@@ -24,7 +24,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, avail
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 w-full max-w-md overflow-hidden">
         <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-          <h3 className="text-lg font-bold flex items-center gap-2">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <FilterIcon size={20} className="text-blue-500" />
             Graph Filters
           </h3>

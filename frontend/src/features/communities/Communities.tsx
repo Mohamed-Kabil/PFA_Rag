@@ -8,11 +8,10 @@ import {
   Zap, Star, Network, Target, Play, Terminal,
 } from 'lucide-react';
 
-const DEFAULT_CYPHER = `MATCH (e:Entity)
-WHERE e.communityId IS NOT NULL
-RETURN e.communityId AS community, collect(e.name)[0..10] AS members, count(e) AS size
-ORDER BY size DESC
-LIMIT 20`;
+const DEFAULT_CYPHER = `MATCH (a:Entity)-[r:RELATED_TO]->(b:Entity)
+WHERE a.communityId = b.communityId AND a.communityId IS NOT NULL
+RETURN a, r, b
+LIMIT 200`;
 
 const COMMUNITY_COLORS = [
   '#3b82f6','#a855f7','#10b981','#f59e0b','#ef4444',

@@ -51,15 +51,19 @@ export const GraphPreview: React.FC = () => {
     setTimeout(() => graphRef.current?.zoomToFit(300, 50), 50);
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-      Loading Graph...
-    </div>
-  );
-
   return (
-    <div ref={containerRef} className="w-full h-full min-h-[400px]">
-      {dimensions.width > 0 && (
+    <div ref={containerRef} className="relative w-full h-full min-h-[400px]">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
+          Loading Graph...
+        </div>
+      )}
+      {!loading && data.nodes.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
+          No graph data available.
+        </div>
+      )}
+      {!loading && dimensions.width > 0 && data.nodes.length > 0 && (
         <ForceGraph2D
           ref={graphRef}
           graphData={data}
